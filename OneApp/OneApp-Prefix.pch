@@ -1,0 +1,34 @@
+//
+// Prefix header for all source files of the 'OneApp' target in the 'OneApp' project
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_3_0
+#warning "This project uses features only available in iOS SDK 3.0 and later."
+#endif
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+    #import <CoreData/CoreData.h>
+	#import <Parse/Parse.h>
+	
+	#import "OAConstants.h"
+	#import "OACache.h"
+	#import "OAUtility.h"
+    #import "UIImage+Resize.h"
+    #import "UIImage+RoundedCorner.h"
+    #import "UIImage+Alpha.h"
+    #import "JoustData.h"
+    #import "JoustDebug.h"
+#endif
+
+
+#define UIColorFromRGB(rgbValue) [UIColor \
+colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 \
+green:((float)((rgbValue & 0xFF00) >> 8))/255.0 \
+blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
+
+/** UIColor: Color from RGBA **/
+#define colorFromRGBA(r , g , b , a ) ( [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:a ] )
