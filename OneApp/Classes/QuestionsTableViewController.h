@@ -13,11 +13,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-@interface QuestionsTableViewController : PFQueryTableViewController
+@interface QuestionsTableViewController : PFQueryTableViewController <UIPickerViewDelegate, UIPickerViewDataSource, UIActionSheetDelegate>
 {
     NSArray* _systemQuestions;
 	NSArray* _userQuestions;
 	NSArray* _friendQuestions;
+	
+	UIActionSheet *actionSheet;
+	NSString *pickerType;
+	int categoryFilter;
 	
 	BOOL shouldReloadOnAppear;
 }

@@ -77,6 +77,7 @@ NSString *const kOAQuestionPictureKey         = @"image";
 NSString *const kOAQuestionThumbnailKey       = @"thumbnail";
 NSString *const kOAQuestionUserKey            = @"user";
 NSString *const kOAQuestionTypeKey			  = @"type";
+NSString *const kOAQuestionCategoryKey		  = @"";
 
 #pragma mark - Cached Question Attributes
 // keys

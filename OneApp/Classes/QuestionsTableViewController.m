@@ -58,12 +58,135 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+	
+	UIBarButtonItem *filterButton = [[UIBarButtonItem alloc] initWithTitle:@"Filter" style:UIBarButtonItemStylePlain target:self action:@selector(filterClick:)];
+	self.navigationItem.rightBarButtonItem = filterButton;
+	[filterButton release];
     
     UIView *footer = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 1, 35)] autorelease];
     footer.backgroundColor = [UIColor blackColor];
     self.tableView.tableFooterView = footer;
     [footer release];
 }
+
+////////////////////////////////////////////////////////////////////////////////
+-(void)filterClick:(id)sender
+{
+	[self createActionSheet];
+	pickerType = @"picker";
+	UIPickerView *chPicker = [[UIPickerView alloc] initWithFrame:CGRectMake(0.0, 44.0, 0.0, 0.0)];
+	chPicker.dataSource = self;
+	chPicker.delegate = self;
+	chPicker.showsSelectionIndicator = YES;
+	[actionSheet addSubview:chPicker];
+	
+	[chPicker release];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+- (void)createActionSheet
+{
+	if (actionSheet == nil)
+	{
+		// setup actionsheet to contain the UIPicker
+		actionSheet = [[UIActionSheet alloc] initWithTitle:@"Select"
+												  delegate:self
+										 cancelButtonTitle:nil
+									destructiveButtonTitle:nil
+										 otherButtonTitles:nil];
+		
+		UIToolbar *pickerToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+		pickerToolbar.barStyle = UIBarStyleBlackOpaque;
+		[pickerToolbar sizeToFit];
+		
+		NSMutableArray *barItems = [[NSMutableArray alloc] init];
+		
+		UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil];
+		[barItems addObject:flexSpace];
+		[flexSpace release];
+
+		UIBarButtonItem *cancelBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(pickerCancel:)];
+		[barItems addObject:cancelBtn];
+		[cancelBtn release];
+		
+		UIBarButtonItem *doneBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(pickerDone:)];
+		[barItems addObject:doneBtn];
+		[doneBtn release];
+		
+		[pickerToolbar setItems:barItems animated:YES];
+		[barItems release];
+		
+		[actionSheet addSubview:pickerToolbar];
+		[pickerToolbar release];
+		
+		[actionSheet showInView:self.view];
+		[actionSheet setBounds:CGRectMake(0,0,320, 464)];
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+- (void)pickerDone:(id)sender
+{
+	[[NSNotificationCenter defaultCenter] postNotificationName:BaseControllerShowLoader object: nil];
+	[self loadObjects];
+	[actionSheet dismissWithClickedButtonIndex:0 animated:YES];
+	[actionSheet release];
+	actionSheet = nil;
+	[NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(filterChooseDelayFired:) userInfo:nil repeats:NO];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+- (void)filterChooseDelayFired:(NSTimer *)aTimer
+{
+	[[NSNotificationCenter defaultCenter] postNotificationName:BaseControllerHideLoader object: nil];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+- (void)pickerCancel:(id)sender
+{
+	[actionSheet dismissWithClickedButtonIndex:0 animated:YES];
+	[actionSheet release];
+	actionSheet = nil;
+}
+
+
+#pragma mark UIPickerViewDelegate Methods
+
+////////////////////////////////////////////////////////////////////////////////
+- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
+{
+	return 1;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
+{
+	return 4;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
+{
+	NSArray *categoryTemp = [NSArray arrayWithObjects:@"Politics", @"Entertainment", @"Food", @"News", nil];
+	
+	return [categoryTemp objectAtIndex:row];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Set the width of the component inside the picker
+- (CGFloat)pickerView:(UIPickerView *)pickerView widthForComponent:(NSInteger)component
+{
+	return 300;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Item picked
+- (void)pickerView:(UIPickerView *)thePickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
+{
+	NSLog(@"FILTER BY CATEGORY %d", row);
+	categoryFilter = row;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 - (void)viewDidUnload
@@ -108,15 +231,45 @@
 	switch (section)
 	{
 		case 0:
-			return [self.systemQuestions count];
+		{
+			if(categoryFilter)
+			{
+				NSPredicate *predicate = [NSPredicate predicateWithFormat:@"category = %d", categoryFilter];
+				return [[self.systemQuestions filteredArrayUsingPredicate:predicate] count];
+			}
+			else
+			{
+				return [self.systemQuestions count];
+			}
+		}
 			break;
 			
 		case 1:
-			return [self.userQuestions count];
+		{
+			if(categoryFilter)
+			{
+				NSPredicate *predicate = [NSPredicate predicateWithFormat:@"category = %d", categoryFilter];
+				return [[self.userQuestions filteredArrayUsingPredicate:predicate] count];
+			}
+			else
+			{
+				return [self.userQuestions count];
+			}
+		}
 			break;
 			
 		case 2:
-			return [self.friendQuestions count];
+		{
+			if(categoryFilter)
+			{
+				NSPredicate *predicate = [NSPredicate predicateWithFormat:@"category = %d", categoryFilter];
+				return [[self.friendQuestions filteredArrayUsingPredicate:predicate] count];
+			}
+			else
+			{
+				return [self.friendQuestions count];
+			}
+		}
 			break;
 			
 		default:
@@ -232,7 +385,7 @@
     [cell addSubview:title];
     [title setFrame:CGRectMake(10, 12, 300, 16)];
 
-   UIImage * orgImage = [UIImage imageNamed:@"one.jpg"];
+    UIImage * orgImage = [UIImage imageNamed:@"one.jpg"];
 	//UIImage * orgImage = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imagePath]]];
 	UIImage* resizeImage = [orgImage resizedImageWithContentMode:UIViewContentModeScaleAspectFill bounds:CGSizeMake(320, 145) interpolationQuality:kCGInterpolationHigh];
 	UIImage *result = [resizeImage croppedImage:CGRectMake(0, 0, 320, 145)];
@@ -242,6 +395,7 @@
 	[title setText:@" 08.27.2012"];
         
 	cell.textLabel.text = [object objectForKey:kOAQuestionTextKey];
+	NSLog(@"CATEGORY: %@", [object objectForKey:kOAQuestionCategoryKey]);
     
 	UIImageView * sepImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"sep.png"]];
 	sepImage.frame = CGRectMake(0, 145, 320, 44);
@@ -336,18 +490,50 @@
 ////////////////////////////////////////////////////////////////////////////////
 - (PFObject *)objectAtIndexPath:(NSIndexPath *)indexPath
 {
+	//[[self objects] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"type = %@", @"system"]]
+	
 	switch (indexPath.section)
 	{
 		case 0:
-			return [self.systemQuestions objectAtIndex:indexPath.row];
-			break;
+		{
+			if(categoryFilter)
+			{
+				NSPredicate *predicate = [NSPredicate predicateWithFormat:@"category = %d", categoryFilter];
+				return [[self.systemQuestions filteredArrayUsingPredicate:predicate] objectAtIndex:indexPath.row];
+			}
+			else
+			{
+				return [self.systemQuestions objectAtIndex:indexPath.row];
+			}
+		}
+		break;
 			
 		case 1:
-			return [self.userQuestions objectAtIndex:indexPath.row];
-			break;
+		{
+			if(categoryFilter)
+			{
+				NSPredicate *predicate = [NSPredicate predicateWithFormat:@"category = %d", categoryFilter];
+				return [[self.userQuestions filteredArrayUsingPredicate:predicate] objectAtIndex:indexPath.row];
+			}
+			else
+			{
+				return [self.userQuestions objectAtIndex:indexPath.row];
+			}
+		}
+		break;
 			
 		case 2:
-			return [self.friendQuestions objectAtIndex:indexPath.row];
+		{
+			if(categoryFilter)
+			{
+				NSPredicate *predicate = [NSPredicate predicateWithFormat:@"category = %d", categoryFilter];
+				return [[self.friendQuestions filteredArrayUsingPredicate:predicate] objectAtIndex:indexPath.row];
+			}
+			else
+			{
+				return [self.friendQuestions objectAtIndex:indexPath.row];
+			}
+		}
 			break;
 			
 		default:

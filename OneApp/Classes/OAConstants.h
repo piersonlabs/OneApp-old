@@ -14,6 +14,11 @@ typedef enum {
 
 #define QuestionAskedNotification @"kQuestionAskedNotification"
 
+#define BaseControllerShowLoader @"kBaseControllerShowLoader"
+#define BaseControllerHideLoader @"kBaseControllerHideLoader"
+#define BaseControllerShowHandle @"kBaseControllerShowHandle"
+#define BaseControllerHideHandle @"kBaseControllerHideHandle"
+
 #pragma mark - NSUserDefaults
 extern NSString *const kOAUserDefaultsActivityFeedViewControllerLastRefreshKey;
 extern NSString *const kOAUserDefaultsCacheFacebookFriendsKey;
@@ -86,6 +91,7 @@ extern NSString *const kOAQuestionPictureKey;
 extern NSString *const kOAQuestionThumbnailKey;
 extern NSString *const kOAQuestionUserKey;
 extern NSString *const kOAQuestionTypeKey;
+extern NSString *const kOAQuestionCategoryKey;
 
 #pragma mark - Cached Question Attributes
 // keys

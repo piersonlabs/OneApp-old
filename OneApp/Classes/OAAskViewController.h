@@ -13,16 +13,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-@interface OAAskViewController : UIViewController <UITextFieldDelegate>
+@interface OAAskViewController : QuickDialogController <QuickDialogStyleProvider, QuickDialogEntryElementDelegate>
 {
-	UITextField *_tagTextField;
-	UITextField *_questionTextField;
-	UIBackgroundTaskIdentifier _photoPostBackgroundTaskId;
+	UIBackgroundTaskIdentifier* photoPostBackgroundTaskId;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-@property (nonatomic, retain) UITextField *tagTextField;
-@property (nonatomic, retain) UITextField *questionTextField;
-@property (nonatomic, assign) UIBackgroundTaskIdentifier photoPostBackgroundTaskId;
+@property (nonatomic, assign) UIBackgroundTaskIdentifier* photoPostBackgroundTaskId;
 
 @end

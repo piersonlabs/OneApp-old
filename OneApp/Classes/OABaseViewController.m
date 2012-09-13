@@ -94,6 +94,38 @@
 	
 	//create notifications
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showQuestionAfterAsk) name:QuestionAskedNotification object:nil];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLoader) name:BaseControllerShowLoader object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hideLoader) name:BaseControllerHideLoader object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showHandle) name:BaseControllerShowHandle object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hidehandle) name:BaseControllerHideHandle object:nil];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+- (void)viewDidLoad
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:BaseControllerShowLoader];
+	[[NSNotificationCenter defaultCenter] removeObserver:BaseControllerHideLoader];
+	[[NSNotificationCenter defaultCenter] removeObserver:BaseControllerShowHandle];
+	[[NSNotificationCenter defaultCenter] removeObserver:BaseControllerHideHandle];
+	
+    [_resultsView release];
+    [_questionView release];
+    [_navigationController release];
+    
+    [super viewDidLoad];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+- (void)viewDidUnload
+{
+    [super viewDidUnload];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +220,18 @@
 ////////////////////////////////////////////////////////////////////////////////
 -(void)showAsk
 {
-    [[self navigationController] setViewControllers:[NSArray arrayWithObject:[self askView]] animated:YES];
+	//UINavigationController *navigation = [QuickDialogController controllerWithNavigationForRoot:root];
+	//[self presentModalViewController:navigation animated:YES];
+	
+	QRootElement *root = [[QRootElement alloc] init];
+	root.title = @"Ask A Question";
+	root.grouped = YES;
+	root.controllerName = @"OAAskViewController";
+	
+	OAAskViewController *askController = (OAAskViewController*)[QuickDialogController controllerForRoot:root];
+
+	[[self navigationController] setViewControllers:[NSArray arrayWithObject:askController] animated:YES];
+    //[[self navigationController] setViewControllers:[NSArray arrayWithObject:[self askView]] animated:YES];
     [self hideDrawer];
     [self setState:@"ask"];
 }
@@ -578,26 +621,6 @@
 					 }];
 }
 
-////////////////////////////////////////////////////////////////////////////////
-- (void)viewDidLoad
-{
-    [_resultsView release];
-    [_questionView release];
-    [_navigationController release];
-    
-    [super viewDidLoad];
-}
 
-////////////////////////////////////////////////////////////////////////////////
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
 
 @end

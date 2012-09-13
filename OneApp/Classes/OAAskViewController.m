@@ -15,9 +15,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 @implementation OAAskViewController
 
-@synthesize tagTextField = _tagTextField;
-@synthesize photoPostBackgroundTaskId = _photoPostBackgroundTaskId;
-
 ////////////////////////////////////////////////////////////////////////////////
 - (id)init
 {
@@ -25,6 +22,7 @@
     if (self)
 	{
 		[self setTitle:@"Ask A Question"];
+
     }
     return self;
 }
@@ -34,59 +32,45 @@
 {
     [super viewDidLoad];
 	
-	CGRect passwordTextFieldFrame = CGRectMake(20.0f, 20.0f, 280.0f, 180.0f);
-	[self setQuestionTextField:[[UITextField alloc] initWithFrame:passwordTextFieldFrame]];
-	[self questionTextField].placeholder = @"Ask a Question";
-	[self questionTextField].backgroundColor = [UIColor whiteColor];
-	[self questionTextField].textColor = [UIColor blackColor];
-	[self questionTextField].font = [UIFont systemFontOfSize:14.0f];
-	[self questionTextField].borderStyle = UITextBorderStyleRoundedRect;
-	[self questionTextField].clearButtonMode = UITextFieldViewModeWhileEditing;
-	[self questionTextField].returnKeyType = UIReturnKeyDone;
-	[self questionTextField].textAlignment = UITextAlignmentLeft;
-	[self questionTextField].contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-	[self questionTextField].delegate = self;
-	[self questionTextField].autocapitalizationType = UITextAutocapitalizationTypeNone;
-	[[self questionTextField] setValue:[UIColor colorWithRed:154.0f/255.0f green:146.0f/255.0f blue:138.0f/255.0f alpha:1.0f] forKeyPath:@"_placeholderLabel.textColor"];
-	[self.view addSubview:[self questionTextField]];
+	QSection *section = [[QSection alloc] init];
+	[section setTitle:@"Your Question"];
 	
-	[self setTagTextField:[[UITextField alloc] initWithFrame:CGRectMake( 20.0f, 210.0f, 280.0f, 31.0f)]];
-	[self tagTextField].font = [UIFont systemFontOfSize:14.0f];
-	[self tagTextField].placeholder = @"Tag this question";
-	[self tagTextField].returnKeyType = UIReturnKeySend;
-	[self tagTextField].textColor = [UIColor colorWithRed:73.0f/255.0f green:55.0f/255.0f blue:35.0f/255.0f alpha:1.0f];
-	[self tagTextField].contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-	[self tagTextField].autocapitalizationType = UITextAutocapitalizationTypeNone;
-	[self tagTextField].borderStyle = UITextBorderStyleRoundedRect;
-	[self tagTextField].delegate = self;
-	[[self tagTextField] setValue:[UIColor colorWithRed:154.0f/255.0f green:146.0f/255.0f blue:138.0f/255.0f alpha:1.0f] forKeyPath:@"_placeholderLabel.textColor"];
-	[self.view addSubview:[self tagTextField]];
+	QEntryElement *question = [[QEntryElement alloc] initWithTitle:@"" Value:@""];
+	question.key = @"question";
+	question.height = 180.0f;
+	[section addElement:question];
 	
-	UIButton *btn_ask = [UIButton buttonWithType:UIButtonTypeCustom];
-	[btn_ask setFrame:CGRectMake(35, 260, 260, 30)];
-	[btn_ask setTitle:@"Login" forState:UIControlStateNormal];
-	[btn_ask setImage:[UIImage imageNamed:@"btn_ask.png"] forState:UIControlStateNormal];
-	[btn_ask addTarget:self action:@selector(askQuestionClick:) forControlEvents:UIControlEventTouchUpInside];
-	[self.view addSubview:btn_ask];
+	QSection *sectionCat = [[QSection alloc] init];
+	[sectionCat setTitle:@"Category"];
 	
+	NSArray *categoryTemp = [NSArray arrayWithObjects:@"Politics", @"Entertainment", @"Food", @"News", nil];
+	QRadioElement *categoryElement = [[QRadioElement alloc] initWithItems:categoryTemp selected:2];
+	categoryElement.key = @"category";
+	[sectionCat addElement:categoryElement];
+	
+	QSection *subSection = [[QSection alloc] init];
+	QButtonElement *button = [[QButtonElement alloc] init];
+	button.title = @"Ask Question";
+	button.controllerAction = @"onAsk:";
+	[subSection addElement:button];
+	
+	[self.root addSection:section];
+	[self.root addSection:sectionCat];
+	[self.root addSection:subSection];
 }
 
-#pragma mark - UITextFieldDelegate
+
+
+#pragma mark - Form Delegate Methods
 
 ////////////////////////////////////////////////////////////////////////////////
-- (BOOL)textFieldShouldReturn:(UITextField *)textField
+- (void)onAsk:(QButtonElement *)buttonElement
 {
-    //[self askQuestionClick:textField];
-    [textField resignFirstResponder];
-    return YES;
-}
-
-////////////////////////////////////////////////////////////////////////////////
--(void)askQuestionClick:(id)sender
-{
-	//NSDictionary *userInfo = [NSDictionary dictionary];
-    NSString *trimmedComment = [self.questionTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    
+	NSMutableDictionary* info = [[NSMutableDictionary alloc] init];
+	[self.root fetchValueIntoObject:info];
+	NSLog(@"BUTTON PRESSED: %@", info);
+	
+	NSString *trimmedComment = [[info valueForKey:@"question"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 	if (trimmedComment.length == 0)
 	{
 		NSLog(@"Question failed to post: Blank Question");
@@ -100,9 +84,10 @@
     [question setObject:[PFUser currentUser] forKey:kOAQuestionUserKey];
     [question setObject:trimmedComment forKey:kOAQuestionTextKey];
 	[question setObject:@"user" forKey:kOAQuestionTypeKey];
+	[question setObject:[info objectForKey:@"category"] forKey:kOAQuestionCategoryKey];
     //[photo setObject:self.thumbnailFile forKey:kPAPPhotoThumbnailKey];
     
-    // Photos are public, but may only be modified by the user who uploaded them
+    // questions are public, but may only be modified by the user who uploaded them
     PFACL *questionACL = [PFACL ACLWithUser:[PFUser currentUser]];
     [questionACL setPublicReadAccess:YES];
     question.ACL = questionACL;
@@ -129,7 +114,7 @@
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:QuestionAskedNotification object: nil];
 	
-	//PUSH NOTIFICATIONS
+	// PUSH NOTIFICATIONS
 	// refresh cache
 	/*
 	 NSMutableSet *channelSet = [NSMutableSet setWithCapacity:self.objects.count];
@@ -167,8 +152,8 @@
 	 [push sendPushInBackground];
 	 }
 	 */
-
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 - (void)viewDidUnload

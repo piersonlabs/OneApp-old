@@ -13,7 +13,8 @@
     #import <Foundation/Foundation.h>
     #import <CoreData/CoreData.h>
 	#import <Parse/Parse.h>
-	
+	#import <QuickDialog/QuickDialog.h>
+
 	#import "OAConstants.h"
 	#import "OACache.h"
 	#import "OAUtility.h"
